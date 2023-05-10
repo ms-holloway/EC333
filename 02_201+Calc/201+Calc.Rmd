@@ -1,0 +1,23 @@
+---
+title: 'EC 333: 201 Catch-up and a Little Calculus'
+author: 'Steven Holloway'
+date: Fall 2023 - `r format(Sys.time(), '%d %B %Y')`
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts','my-css.css'] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+
+```{r, echo = F}
+
+library(pacman)
+
+p_load(readxl, knitr, extrafont, tidyverse, magrittr, janitor, kableExtra)
+
+
+```
