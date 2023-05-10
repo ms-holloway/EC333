@@ -13,11 +13,454 @@ output:
       ratio: '16:9'
 ---
 
-```{r, echo = F}
-
+```{r Setup, include = F}
 library(pacman)
-
-p_load(readxl, knitr, extrafont, tidyverse, magrittr, janitor, kableExtra)
-
-
+p_load(ggthemes, readxl, viridis, knitr, dslabs, extrafont, Ecdat, tidyverse, magrittr, janitor, kableExtra)
+# Define colors
+red_pink <- "#e64173"
+met_slate <- "#272822" # metropolis font color 
+purple <- "#9370DB"
+green <- "#007935"
+light_green <- "#7DBA97"
+orange <- "#FD5F00"
+turquoise <- "#44C1C4"
+red <- "#b92e34"
+# Knitr options
+opts_chunk$set(
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  #dpi = 300,
+  #cache = T,
+  warning = F,
+  message = F
+)  
+theme_simple <- theme_bw() + theme(
+  axis.line = element_line(color = met_slate),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  text = element_text(family = "Fira Sans", color = met_slate, size = 17),
+  axis.text.x = element_text(size = 16),
+  axis.text.y = element_text(size = 16)
+)
+theme_market <- theme_bw() + theme(
+  axis.line = element_line(color = met_slate),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  text = element_text(family = "Fira Sans", color = met_slate, size = 17),
+  axis.title.x = element_text(hjust = 1, size = 17),
+  axis.title.y = element_text(hjust = 1, angle = 0, size = 17),
+  # axis.text.x = element_text(size = 12),
+  # axis.text.y = element_text(size = 12),
+  axis.ticks = element_blank()
+)
+theme_gif <- theme_bw() + theme(
+  axis.line = element_line(color = met_slate),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  text = element_text(family = "Fira Sans", color = met_slate, size = 17),
+  axis.text.x = element_text(size = 12),
+  axis.text.y = element_text(size = 12),
+  axis.ticks = element_blank()
+)
+wrapper <- function(x, ...) paste(strwrap(x, ...), collapse = "\n")
+# functions
+demand <- function(x) 10 - x
+demand_2 <- function(x) 9 - x
+demand_3 <- function(x) 8 - x
+demand_inc <- function(x) 11 - x
+demand_dec <- function(x) 5 - x
+supply <- function(x) 2 + 2*x
+step_demand <- data.frame(x = c(0, 1, 2, 3, 4, 5, 6, 7, 8), mv = c(8, 7, 6, 5, 4, 3, 2, 1, 0))
 ```
+
+# Getting on the Same Page
+
+.bigger[
+
+## Stuff I Hope You Recognize
+
+
+- Supply and Demand 
+
+- Types of Market Failure
+
+- Types of Goods
+
+<br>
+
+## Stuff You May Not Recognize
+
+- Maximizing a One-Variable Function (Derivatives)
+
+]
+
+---
+
+# Terminology
+
+**Market**: a decentralized collection of all actual and potential buyers and sellers of a good whose interactions determine the allocation and price through exchange
+
+<br>
+
+**Demand Curve**: A schedule or graph showing the quantity of a good buyers wish to buy at a given price. Inversely, the marginal willingness to pay or marginal benefit for each good purchased
+
+<br>
+
+**Supply Curve**: A schedule or graph showing the quantity of a good producers wish to produce at a given price. Inversely, the marginal willingness to accept or marginal cost for each good produced
+
+---
+
+# Market Demand
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 6, y =2, yend = 2, color = red_pink, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 2, x=6,xend = 6, color = red_pink, size = 2, linetype = "dashed") +
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 7.5, y = 1.2, color = red_pink, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+Market demand is the sum, or aggregate of all individual demand curves
+]
+
+---
+count:false
+# Market Demand
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 6, y =2, yend = 2, color = red_pink, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 2, x=6,xend = 6, color = red_pink, size = 2, linetype = "dashed") +
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 7.5, y = 1.2, color = red_pink, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+Market demand is the sum, or aggregate of all individual demand curves
+
+Horizontal Interpretation: How many total goods do consumers want to buy at a given price
+]
+
+---
+count:false
+# Market Demand
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 6, y =2, yend = 2, color = red_pink, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 2, x=6,xend = 6, color = red_pink, size = 2, linetype = "dashed") +
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 7.5, y = 1.2, color = red_pink, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+Market demand is the sum, or aggregate of all individual demand curves
+
+Horizontal Interpretation: How many total goods consumers want to buy at a given price
+
+<br>
+
+Vertical Interpretation: The marginal benefit to consumers derived from owning the good
+
+]
+
+---
+# Law of Demand
+
+Demand curves slope downwards. Why?
+
+--
+<br>
+
+Law of Demand:
+
+As the price of a good increases, people prefer less of the good, all else equal
+
+--
+
+<br>
+
+Two sources:
+
+Substitution Effect: As the price increases, other, similar goods become more attractive
+
+--
+
+Income Effect: As the price increases, less of the good can be purchased with the same amount of money
+
+---
+
+# Market Supply
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = purple, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = purple, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 5, y = 10, color = purple, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+Market supply is the sum, or aggregate of all individual supply curves
+
+
+]
+---
+count:false
+# Market Supply
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = purple, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = purple, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 5, y = 10, color = purple, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+Market supply is the sum, or aggregate of all individual supply curves
+
+Horizontal Interpretation: How many total goods producers are willing to sell at a given price
+
+<br>
+
+
+
+]
+
+---
+count:false
+# Market Supply
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = purple, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = purple, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 5, y = 10, color = purple, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+Market supply is the sum, or aggregate of all individual supply curves
+
+Horizontal Interpretation: How many total goods producers are willing to sell at a given price
+
+<br>
+
+Vertical Interpretation: The marginal cost to producers derived from producing the good
+
+]
+
+---
+
+# Law of Supply
+
+Supply curves slope upwards. Why?
+
+<br>
+
+--
+
+Law of Supply: As the price of a good increases, the more producers are willing to supply, all else equal
+
+<br>
+
+--
+
+Production is costly. Producers choose the lowest cost production options first. To produce more, they need to be compensated with a higher price.
+
+---
+
+# Market Equilibrium
+
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = met_slate, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = met_slate, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 4.4, y = 10, color = purple, family = "Fira Sans", size = 9)+
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 8, y = 1.5, color = red_pink, family = "Fira Sans", size = 9)
+```
+
+]
+
+.pull-right[
+Market equilibrium is a price, quantity pair where the demand curve intersects the supply curve
+
+<br>
+
+This means at this price, quantity supplied = quantity demanded
+
+<br>
+
+There is no surplus or shortage of goods: Producers supply as much as they want to and consumers purchase as much as they want to
+
+]
+
+---
+# Benefits of Exchange
+
+.bigger[
+
+Markets exist, in theory, to allow both sides to benefit from the exchange
+
+<br>
+
+Both sides have something that the other values: Consumers value the good, Producers value currency that can be spent on other goods
+
+<br>
+
+Nearly all consumers who purchase a good would have been willing to pay more
+
+<br>
+
+For nearly all goods sold, the producer would have been willing to part with it for less
+]
+
+---
+
+# Consumer Surplus
+
+The demand curve tells us the marginal willingness to pay, or marginal benefit from consuming a good
+
+<br>
+
+Consumer Surplus: Benefit consumers derive beyond the price of the good (Marginal Benefit - Price)
+
+<br>
+
+If Consumer Surplus is positive, it means the consumer would benefit from purchasing the good
+
+<br>
+
+The Optimal Purchase Rule tells us that consumers should purchase until (Marginal Benefit - Price) = 0
+
+<br>
+
+By adding up Consumer Surplus for each good sold, we can numerically represent the benefit to consumers in the market
+
+---
+
+# Producer Surplus
+
+The supply curve tells us the marginal willingness to accept, or the marginal cost of producing a good
+
+<br>
+
+The area under the supply curve corresponds to the cost of production
+
+<br> 
+
+The area under the price line gives us total revenue - a rectangle equal to (Price*Quantity)
+
+<br>
+
+Producer Surplus: Benefit producers derive above marginal cost from selling a good (Price - Marginal Cost)
+
+Or, the difference between revenue earned and the cost of production
+
+---
+# Market Equilibrium
+
+.pull-left[
+```{r, echo = FALSE}
+qs = seq(0,2,0.01)
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = qs)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = met_slate, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = met_slate, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 4.4, y = 10, color = purple, family = "Fira Sans", size = 9)+
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 8, y = 1.5, color = red_pink, family = "Fira Sans", size = 9)+
+  geom_ribbon(aes(x = qs,ymax = demand(qs),ymin = 6), fill = red_pink, alpha = 0.4)+
+  geom_ribbon(aes(x = qs,ymax = 6,ymin = supply(qs)), fill = purple, alpha = 0.4)+
+  annotate("text", label = "CS", x = 0.7, y = 6.75, color = red_pink, family = "Fira Sans", size = 7)+
+  annotate("text", label = "PS", x = 0.7, y = 5.3, color = purple, family = "Fira Sans", size = 7)
+```
+]
+
+.pull-right[
+.pink[**Consumer Surplus**]: Difference between willingness to pay (demand) and price
+
+<br>
+
+.purple[**Producer Surplus**]: Difference between price and marginal cost(supply)
+
+<br>
+
+.blue[**Total Surplus**]: sum of CS and PS (and government revenue when applicable)
+]
