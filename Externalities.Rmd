@@ -1,0 +1,3358 @@
+---
+title: 'EC 333: Externalities'
+author: 'Steven Holloway'
+date: Fall 2023 - `r format(Sys.time(), '%d %B %Y')`
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts','my-css.css'] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+
+```{r Setup, include = F}
+library(pacman)
+p_load(ggthemes, readxl, viridis, knitr, dslabs, extrafont, Ecdat, tidyverse, magrittr, janitor, kableExtra)
+# Define colors
+red_pink <- "#e64173"
+met_slate <- "#272822" # metropolis font color 
+purple <- "#9370DB"
+green <- "#007935"
+light_green <- "#7DBA97"
+orange <- "#FD5F00"
+turquoise <- "#44C1C4"
+red <- "#b92e34"
+# Knitr options
+opts_chunk$set(
+  fig.align = "center",
+  fig.height = 10,
+  fig.width = 10.5,
+  #dpi = 300,
+  #cache = T,
+  warning = F,
+  message = F
+)  
+theme_simple <- theme_bw() + theme(
+  axis.line = element_line(color = met_slate),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  text = element_text(family = "Fira Sans", color = met_slate, size = 17),
+  axis.text.x = element_text(size = 16),
+  axis.text.y = element_text(size = 16)
+)
+theme_market <- theme_bw() + theme(
+  axis.line = element_line(color = met_slate),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  text = element_text(family = "Fira Sans", color = met_slate, size = 17),
+  axis.title.x = element_text(hjust = 1, size = 17),
+  axis.title.y = element_text(hjust = 1, angle = 0, size = 17),
+  # axis.text.x = element_text(size = 12),
+  # axis.text.y = element_text(size = 12),
+  axis.ticks = element_blank()
+)
+theme_gif <- theme_bw() + theme(
+  axis.line = element_line(color = met_slate),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  text = element_text(family = "Fira Sans", color = met_slate, size = 17),
+  axis.text.x = element_text(size = 12),
+  axis.text.y = element_text(size = 12),
+  axis.ticks = element_blank()
+)
+wrapper <- function(x, ...) paste(strwrap(x, ...), collapse = "\n")
+# functions
+demand <- function(x) 10 - x
+demand_2 <- function(x) 9 - x
+demand_3 <- function(x) 8 - x
+demand_inc <- function(x) 11 - x
+demand_dec <- function(x) 5 - x
+supply <- function(x) 2 + 2*x
+step_demand <- data.frame(x = c(0, 1, 2, 3, 4, 5, 6, 7, 8), mv = c(8, 7, 6, 5, 4, 3, 2, 1, 0))
+```
+
+---
+class: clear-slide
+
+**Q:** What is the optimal amount of toxic air pollution?
+
+--
+
+- What are the relevant tradeoffs?
+
+--
+
+**A.sub[1]:** .pink[Maybe not zero.]
+
+- In the future, technological advances could make an emissions-free economy feasible.
+
+- With current technologies, moving to an emissions-free economy would be extraordinarily costly.
+
+--
+
+**A.sub[2]:** .pink[Probably less than there is now.]
+
+- Pollution is costly, but polluters do not bear all of the costs <br> .mono[-->] polluting is "too cheap" <br> .mono[-->] too much pollution.
+
+---
+# Market Failure
+
+## Definition
+
+> The outcome in which an unregulated market does not maximize total surplus (*i.e.,* the market is inefficient). 
+
+--
+
+## Causes
+
+1. Absence of property rights.
+
+    - Externalities (today).
+    
+    - Public goods (after game theory).
+
+2. Market power.
+
+3. Asymmetric information.
+    
+---
+# Externality
+
+## Definition
+
+> An activity that imposes costs or benefits on those not involved in the activity. 
+
+--
+
+The .hi-orange[external cost] or .hi-green[external benefit] of the activity does not factor into the decision to engage in the activity.
+
+- The decision maker fails to **internalize** the external costs or benefits.
+
+- **Result:** The activity is either over-performed or under-performed relative to what is socially optimal.
+
+---
+# Types of Externalities
+
+1. Negative externalities.
+
+    - Presence of external costs.
+    
+2. Positive externalities.
+
+    - Presence of external benefits.
+
+--
+
+Can occur on either side of the market:
+
+- .purple[**Production externalities:**] .purple[Marginal social costs] .mono[!=] .purple[marginal private costs] (*i.e.,* supply curve).
+
+- .pink[**Consumption externalities:**] .pink[Marginal social benefits] .mono[!=] .pink[marginal private benefits] (*i.e.,* marginal values).
+
+---
+class: inverse, middle
+
+# Negative Externalities
+
+---
+class: clear-slide 
+
+.center[.purple[**Production Waste**]]
+
+<br>
+
+.pull-left[
+.center[**Air Pollution**]
+```{r, fig.retina = 1.75, echo = FALSE}
+include_graphics("air_pollution.png")
+```
+]
+
+.pull-right[
+.center[**Water Pollution**]
+```{r, fig.retina = 2.75, echo = FALSE}
+include_graphics("water_pollution.png")
+```
+]
+
+---
+# Negative Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(q_so, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2)
+```
+]
+
+.less-right[
+
+**Q:** How does a negative production externality affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[FM]", "P.sub[FM]", "Q.sub[SO]", "P.sub[SO]"),
+  v2 = c(4.5, "$5.50", 3, "$7.00")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:4, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Negative Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q, y = p_2, xend = q, yend = p), linetype  = "solid", color = met_slate, size = 1) +
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1.5, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a negative production externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EC", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Negative Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = q, y = p_2, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = msc(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  annotate("text", label = "EC", x = q/3, y = p - 1.5, color = green, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a negative production externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EC", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "$13.50", "$6.75", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Negative Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(q_so, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = q, y = p_2, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = demand(z), ymax = p_so), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = msc(z)), fill = orange, alpha = 0.2, linetype = "blank") +
+  annotate("text", label = "DWL", x = (q + q_so)/2 + 0.1, y = p_so, color = orange, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a negative production externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EC", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "$13.50", "$6.75", "$2.25")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+class: clear-slide 
+
+.center[.pink[**Nuisances**]]
+
+<br>
+
+.pull-left[
+.center[**Second-Hand Smoke**]
+```{r, fig.retina = 2.5, echo = FALSE}
+include_graphics("smoking.png")
+```
+]
+
+.pull-right[
+.center[**Driving**]
+```{r, fig.retina = 1.25, echo = FALSE}
+include_graphics("traffic.png")
+```
+]
+
+---
+# Negative Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msb <- function(x) 10 - x - ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(q_so, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 6.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2)
+```
+]
+
+.less-right[
+
+**Q:** How does a negative consumption externality affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[FM]", "P.sub[FM]", "Q.sub[SO]", "P.sub[SO]"),
+  v2 = c(4.5, "$5.50", 3, "$4.00")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:4, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Negative Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msb <- function(x) 10 - x - ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 6.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1.5, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a negative consumption externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EC", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Negative Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msb <- function(x) 10 - x - ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 6.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = msb(z), ymax = demand(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  annotate("text", label = "EC", x = q/3, y = p + 1.5, color = green, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a negative consumption externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EC", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "$13.50", "$6.75", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Negative Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msb <- function(x) 10 - x - ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(q_so, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 6.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = msb(z), ymax = p_so), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = supply(z)), fill = orange, alpha = 0.2, linetype = "blank") +
+  annotate("text", label = "DWL", x = (q + q_so)/2 + 0.1, y = p_so, color = orange, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a negative consumption externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EC", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "$13.50", "$6.75", "$2.25")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+class: inverse, middle
+
+# Positive Externalities
+
+---
+class: clear-slide 
+
+.center[**Beneficial Spillovers**]
+
+<br>
+
+.pull-left[
+.center[.purple[**Research**]]
+```{r, fig.retina = 2.75, echo = FALSE}
+include_graphics("r_and_d.png")
+```
+]
+
+.pull-right[
+.center[.pink[**Vaccination**]]
+```{r, fig.retina = 2.75, echo = FALSE}
+include_graphics("vaccines.png")
+```
+]
+
+---
+# Positive Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- -3
+
+demand <- function(x) 10 - x
+supply <- function(x) 3 + x
+msc <- function(x) 3 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 7, y = 5.9, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2)
+```
+]
+
+.less-right[
+
+**Q:** How does a positive production externality affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[FM]", "P.sub[FM]", "Q.sub[SO]", "P.sub[SO]"),
+  v2 = c(3.5, "$6.50", 5, "$5.00")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:4, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Positive Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- -3
+
+demand <- function(x) 10 - x
+supply <- function(x) 3 + x
+msc <- function(x) 3 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 7, y = 5.9, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a positive production externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EB", "TS", "DWL"),
+  v2 = c("$6.125", "$6.125", "", "", "\\( \\qquad \\, \\ \\ \\)") 
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Positive Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- -3
+
+demand <- function(x) 10 - x
+supply <- function(x) 3 + x
+msc <- function(x) 3 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 7, y = 5.9, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = msc(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  annotate("text", label = "EB", x = q/3, y = p_so - 2.25, color = green, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a positive production externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EB", "TS", "DWL"),
+  v2 = c("$6.125", "$6.125", "$10.50", "$22.75", "") 
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Positive Production Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- -3
+
+demand <- function(x) 10 - x
+supply <- function(x) 3 + x
+msc <- function(x) 3 + x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(q, q_so, 0.1)
+w <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 7, y = 5.9, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = demand(z), ymax = p_so), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = msc(z)), fill = orange, alpha = 0.2, linetype = "blank") +
+  annotate("text", label = "DWL", x = (q + q_so)/2 - 0.1, y = p_so, color = orange, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = supply(w), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = p, ymax = demand(w)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = supply(w), ymax = msc(w)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  annotate("text", label = "EB", x = q/3, y = p_so - 2.25, color = green, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a positive production externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EB", "TS", "DWL"),
+  v2 = c("$6.125", "$6.125", "$10.50", "$22.75", "$2.25") 
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Positive Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MSB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2)
+```
+]
+
+.less-right[
+
+**Q:** How does a positive consumption externality affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[FM]", "P.sub[FM]", "Q.sub[SO]", "P.sub[SO]"),
+  v2 = c(3, "$4.00", 4.5, "$5.50")
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:4, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Positive Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MSB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a positive consumption externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EB", "TS", "DWL"),
+  v2 = c("$4.50", "$4.50", "", "", "\\( \\qquad \\, \\ \\ \\)") 
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Positive Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MSB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = demand(z), ymax = msb(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a positive consumption externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EB", "TS", "DWL"),
+  v2 = c("$4.50", "$4.50", "$9.00", "$18.00", "") 
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Positive Consumption Externalities
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(q, q_so, 0.1)
+w <- seq(0, q, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MSB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p_so), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = msb(z)), fill = orange, alpha = 0.2, linetype = "blank") +
+  annotate("text", label = "DWL", x = (q + q_so)/2 - 0.1, y = p_so, color = orange, family = "Fira Sans", size = 6) +
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = w, ymin = supply(w), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = p, ymax = demand(w)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = demand(w), ymax = msb(w)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a positive consumption externality affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "EB", "TS", "DWL"),
+  v2 = c("$4.50", "$4.50", "$9.00", "$18.00", "$2.25") 
+) %>% kable(
+  escape = F,
+  col.names = c("Externality", "$3.00"),
+  align = c("l", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:5, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+class: inverse, middle
+
+# Solutions
+
+---
+
+# Coase Theorem
+
+How do we address the inefficiency?
+
+<br>
+
+If the market satisfies certain conditions, it may be possible for involved parties to resolve the externality
+
+<br>
+
+Involved parties can negotiate on a price to reduce or increase production to optimal levels
+
+<br>
+
+This result comes from what we call the **.green[Coase Theorem]**
+
+
+---
+
+# Coase Theorem
+
+## Version 1
+
+> If there are zero transaction costs, then resource allocation is independent of the distribution of property rights.
+
+--
+
+## Version 2
+
+> If property rights exist, transaction costs are low, and there are few parties involved, then private actors can bargain to eliminate the deadweight loss associated with an externality.
+
+---
+
+# Example
+
+
+A farmer and manufacturer use neighboring plots along a river
+
+<br>
+
+The manufacturer creates water pollutants that negatively affect the farmer's yields
+
+<br>
+
+To invest in pollutant-reducing technology would cost the manufacturer $300,000, for the farmer to move would cost $900,000
+
+<br>
+
+--
+
+**Q**: What is the mutually agreed upon solution and who pays what?
+
+--
+
+**A**: Someone should pay for the pollutant-reducing technology, the cheapest option
+
+
+---
+
+class: clear-slide
+
+**Q:** Who should pay more?
+
+--
+
+**A:** .pink[Depends on their/ a judge's ruling]
+
+--
+
+If the farmer is given property rights, the manufacturer would have to pay for the right to pollute the water
+
+--
+
+<br>
+
+If the manufacturer is given property rights, the farmer would have to pay for the right clean water
+
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9)
+#stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  #annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) 
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  #geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  #geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z, ymin = demand(z), ymax = msb(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+
+]
+
+.less-right[
+MB is the manufacturers marginal benefit
+
+<br>
+
+If they don't internalize any cost, they will produce until their MB = 0, at a quantity of 10
+
+
+]
+
+---
+
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9)+
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) 
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  #geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  #geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z, ymin = demand(z), ymax = msb(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+
+]
+
+.less-right[
+MB is the manufacturers marginal benefit
+
+<br>
+
+If they don't internalize any cost, they will produce until their MB = 0, at a quantity of 10
+
+<br>
+
+This fails to account for the costs that the farmer is incurring (MC)
+]
+
+
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 9, 1),'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+#stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  #annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) 
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  #geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  #geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z, ymin = demand(z), ymax = msb(z)), fill = green, alpha = 0.2, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z_p, ymin = p_p, ymax = msb(z_p)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+Shaded area is benefit to manufacturer: $\frac{1}{2} * 10 * 10 = 50$
+
+<br>
+
+Producing any less will result in lower benefit for themselves
+
+<br>
+
+Call this quantity Q*, the private optimum
+
+]
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 9, 1),'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  #stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  #annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  #geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  #geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z_p, ymin = 0, ymax = mc(z_p)), fill = purple, alpha = 0.4, linetype = "blank") # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z_p, ymin = p_p, ymax = msb(z_p)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+Shaded area is now cost to farmer: $\frac{1}{2} * 10 * 10 = 50$
+
+<br>
+
+Any production by the manufacturer above 0 will harm the farmer
+
+<br>
+
+How do we maximize social benefit?
+]
+---
+count:false
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 9, 1),'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  #stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  #annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  #geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  #geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z_p, ymin = 0, ymax = mc(z_p)), fill = purple, alpha = 0.4, linetype = "blank") # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z_p, ymin = p_p, ymax = msb(z_p)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+Shaded area is now cost to farmer: $\frac{1}{2} * 10 * 10 = 50$
+
+<br>
+
+Any production by the manufacturer above 0 will harm the farmer
+
+<br>
+
+How do we maximize social benefit?
+
+
+Need to find the quantity where MB = MC
+]
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+At a quantity of 5, MB = MC = 5
+
+<br>
+
+Manufacturer's Benefit = $\frac{1}{2}(5*5) + 5*5 = 37.5$
+
+Farmer's Benefit(Cost) = $-\frac{1}{2}(5*5) = 12.5$
+
+Total Benefit = $37.5 - 12.5 = 25$
+
+
+]
+
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+If we go below this quantity, MB>MC meaning producing more would result in higher social benefit
+
+<br>
+
+If we go above this quantity, MB<MC meaning producing more reduces social benefit
+
+<br>
+
+5 is then our socially optimal quantity
+]
+
+---
+# Coase Theorem Example
+
+.pull-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6)+
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = 5), fill = green, alpha = 0.4, linetype = "blank")
+```
+]
+
+.pull-right[
+
+If the farmer is given the rights, they want Q = 0
+
+<br>
+
+The manufacturer can pay the farmer to allow them to produce
+
+<br>
+
+The manufacturer would be willing to pay $5 each to the farmer to produce 5 units
+
+
+Any higher price is too costly for the manufacturer, any lower price leaves value on the table
+]
+
+---
+# Coase Theorem Example
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank")+ # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6)+
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = 5), fill = green, alpha = 0.4, linetype = "blank")
+```
+]
+
+.less-right[
+
+Manufacturer's Total Benefit = $\frac{1}{2}*5*5 + (5*5) -(5*5) = 12.5$
+]
+
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank")+ # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6)+
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = 5), fill = green, alpha = 0.4, linetype = "blank")
+```
+]
+
+.less-right[
+
+Manufacturer's Total Benefit = $\frac{1}{2}*5*5 + (5*5) -(5*5) = 12.5$
+
+<br>
+
+Farmer's Total Benefit = $- (\frac{1}{2}*5*5) + (5*5) = 12.5$
+
+<br>
+
+Added Together: 25 (Same as optimal outcome)
+]
+---
+
+# Coase Theorem Example
+
+.pull-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+zmin = seq(5,10,0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank") # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6)+
+  geom_ribbon(aes(x = zmin, ymin = 0, ymax = 5), fill = green, alpha = 0.4, linetype = "blank")
+```
+]
+
+.pull-right[
+
+If the farmer is given the rights, they want Q = 10
+
+<br>
+
+The farmer can pay the manufacturer to produce less
+
+<br>
+
+The farmer would be willing to pay $5 each to the manufacturer to reduce production down to 5 units
+
+
+Any higher price is too costly for the farmer, any lower price leaves value on the table
+]
+
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.4, linetype = "blank") + # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank") # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6)+
+  geom_ribbon(aes(x = zmin, ymin = 0, ymax = 5), fill = green, alpha = 0.4, linetype = "blank")
+```
+]
+
+.less-right[
+
+Farmer's Total Benefit = $-(\frac{1}{2}(5*5) + (5*5)) = -37.5$
+]
+
+
+---
+# Coase Theorem Example
+
+.more-left[
+
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+
+demand <- function(x) 7 - x
+supply <- function(x) 1 + x
+msb <- function(x) 7 - x + ext
+mc = function(x) x
+
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+p <- supply(q)
+p_2 <- msb(q)
+
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+
+q_p = uniroot(function(x) msb(x), range(x))$root
+p_p = msb(q_p)
+z_p = seq(0, q_p, 0.1)
+
+z_o = seq(0, 5, 0.1)
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1), labels = c(seq(0, 4, 1),'Q_opt',6,7,8,9,'Q*')) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  #stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MB), x = 9.6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+stat_function(aes(x=0), fun = mc, color = purple, size = 1, linetype = "solid") + 
+  #stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(MC), x = 9.6, y = 8, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  #annotate("text", label = expression(D), x = 6, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = 5, y = 0, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = 5, xend = 5, yend = 5), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  # geom_segment(aes(x = q_so, y = 0, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  # geom_segment(aes(x = 0, y = p_so, xend = q_so, yend = p_so), linetype  = "dashed", color = met_slate, size = 1) + # P*
+ # geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  # geom_point(aes(x = q_so, y = p_so), color = met_slate, size = 2) +
+  #geom_ribbon(aes(x = z_o, ymin = 0, ymax = mc(z_o)), fill = purple, alpha = 0.8, linetype = "blank") # ext. cost
+  #annotate("text", label = "EB", x = q/3, y = p_so + 2, color = green, family = "Fira Sans", size = 6) +
+  #geom_segment(aes(x = q, y = p, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  #annotate("text", label = "PS", x = q/3, y = p - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z_o, ymin = 0, ymax = msb(z_o)), fill = red_pink, alpha = 0.4, linetype = "blank")+ # CS
+  #annotate("text", label = "CS", x = q/3, y = p + 1, color = red_pink, family = "Fira Sans", size = 6)+
+  geom_ribbon(aes(x = zmin, ymin = 0, ymax = 5), fill = green, alpha = 0.4, linetype = "blank")
+```
+]
+
+.less-right[
+
+Farmer's Total Benefit = $-(\frac{1}{2}(5*5) - (5*5) = -37.5$
+
+Manufacturer's Total Benefit = $(\frac{1}{2}(5*5) +(5*5)) + (5*5) = 62.5$
+
+Added Together: 25 (Same optimal outcome)
+]
+---
+
+
+
+# Coase Theorem Critique
+
+Important to realize *distributional effects* may differ
+
+<br>
+
+When the manufacturer has the property rights, the farmer ends up paying heavily
+
+<br>
+
+When the farmer had property rights, the manufacturer didn't achieve as high of rents
+
+<br>
+
+This imbalance often leads to inequity in environmental contexts
+
+
+---
+# Coase Theorem Critique
+
+Poor communities often have few resources, little leverage in negotiations
+
+<br>
+
+This leads to polluters being given property rights
+
+<br>
+
+These poor communities are then disproportionately exposed to pollution
+
+<br>
+
+Further, they cannot afford the price to reduce the pollution, leading to even higher levels of relative pollution
+
+---
+
+# More Issues 
+
+Even if poor communities could properly negotiate, the requirements for the application of the Coase Theorem breakdown before this is relevant
+
+<br>
+
+**Transaction costs are almost always high** - Polluting is often lucrative and highly disputed, requiring the use of legal counsel
+
+
+**Very rarely are few actors involved** - It isn't just the farmer and manufacturer, but also fishermen, recreationalists, etc.
+
+
+
+**Information in these markets is also poor** - Not only is it difficult to price pollution, but firms often have better access to this information
+
+
+**The Coase Theorem also requires full privatization of markets** - As we'll learn, environmental goods do not perform well when fully privatized
+
+---
+
+# Coase Theorem Critique
+
+And yet, some policies still lean on the Coase Theorem:
+
+**Application:** Cap-and-trade.
+
+- Issue permits to polluting manufacturers to 'allow' them to pollute the 'optimal' amount in aggregate
+
+- Firms trade and determine price between themselves to determine who gets to pollute
+
+- Firms that don't want to buy permits have to invest in ways to reduce their emissions
+
+- Induces some polluters to use abatement technologies (*e.g.,* scrubbers).
+
+<br>
+
+Lots of evidence to suggest that cap-and-trade programs inequitably distribute pollution
+
+---
+
+# Alternatives?
+
+The hope that individual actors can negotiate to the correct answer in a fair manner may feel farfetched -- especially when there's more than two agents or the rights are not well-defined
+
+<br>
+
+Instead, a larger body that has better ability to 
+- know the optimal allocation
+- coordinate the economy
+- and collect and disperse funds
+
+may be able to institute a better solution
+
+
+<br>
+
+In many cases, governments will be able to alleviate the externality problem by leveraging these properties
+
+
+
+---
+
+# Government Policies
+
+- Information-based instruments(smart meters)
+
+  - government regulations can require the use of information -collecting devices by private firms
+  - ecolabeling and certification programs, which provide consumers with information about how a product was manufactured
+  
+
+<br>
+
+--
+
+This helps consumers and producers internalize costs and benefits by making them aware they exist.
+
+<br>
+
+Cheap, hands-off, but may not fully correct externality
+
+
+---
+
+# Government Policies
+
+- Quantity-based instruments
+  - Quotas (quantity limits)
+  - Example: emissions standards
+  
+<br>
+
+--
+
+Forces market to the socially optimal quantity
+
+<br>
+
+Requires precise information about costs and benefits
+
+<br>
+
+In the case of negative production externalities, shifts surplus towards producers due to higher price
+---
+# Government Policies
+
+- Price-based instruments(taxes and subsidies): Charge individuals and firms to internalize the external cost to soceity they cause
+
+<br>
+
+Requires the same amount of info as quotas and creates government revenue
+
+---
+# Pigouvian Tax
+
+## Definition
+
+> A tax designed to make individuals and firms act as though they have internalized an externality.
+
+## Examples
+
+- Carbon taxes.
+
+    - **Idea:** Put a price on carbon.
+    - **In practice:** Impose specific taxes on goods (mainly fuels) based on their carbon content.
+    - British Columbia taxes carbon dioxide emissions at a rate of $35 per metric ton.
+
+
+- Congestion pricing.
+
+---
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 1
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p_s), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = green, alpha = 0.2, linetype = "blank")
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$8.00]", ".purple[$8.00]", ".green[$4.00]", "\\( \\qquad \\; \\, \\, \\)", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$1.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 1
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = msc(z)), fill = green, alpha = 0.2, linetype = "blank") 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$8.00]", ".purple[$8.00]", ".green[$4.00]", ".green[$12.00]", "$8.00", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$1.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 1
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(q_so, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = demand(z), ymax = p_so), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = msc(z)), fill = orange, alpha = 0.2, linetype = "blank") 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$8.00]", ".purple[$8.00]", ".green[$4.00]", ".green[$12.00]", "$8.00", ".orange[$1.00]")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$1.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 2
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p_s), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = green, alpha = 0.2, linetype = "blank")
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$6.125]", ".purple[$6.125]", ".green[$7.00]", "\\( \\qquad \\ \\: \\, \\)", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$2.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 2
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = msc(z)), fill = green, alpha = 0.2, linetype = "blank") 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$6.125]", ".purple[$6.125]", ".green[$7.00]", ".green[$10.50]", "$8.75", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$2.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 2
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(q_so, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = demand(z), ymax = p_so), fill = orange, alpha = 0.4, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = msc(z)), fill = orange, alpha = 0.4, linetype = "blank") 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$6.125]", ".purple[$6.125]", ".green[$7.00]", ".green[$10.50]", "$8.75", ".orange[$0.25]")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$2.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p_s), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = green, alpha = 0.2, linetype = "blank")
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$4.50]", ".purple[$4.50]", ".green[$9.00]", "", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = msc(z)), fill = green, alpha = 0.2, linetype = "blank") 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$4.50]", ".purple[$4.50]", ".green[$9.00]", ".green[$9.00]", "$9.00", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Pigouvian Tax
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 3
+tax <- 3
+
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+msc <- function(x) 1 + x + ext
+supply_tax <- function(x) 1 + x + tax
+
+q <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply_tax(q)
+p_s <- supply(q)
+q_so <- uniroot(function(x) demand(x) - msc(x), range(x))$root
+p_so <- msc(q_so)
+z <- seq(q_so, q, 0.1)
+p_2 <- msc(q)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msc, color = purple, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSC), x = 4.25, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p_2), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = demand(z), ymax = p_so), fill = orange, alpha = 0.4, linetype = "blank") +
+  geom_ribbon(aes(x = z, ymin = p_so, ymax = msc(z)), fill = orange, alpha = 0.4, linetype = "blank") 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax affect total surplus?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c(".pink[CS]", ".purple[PS]", ".green[GR]", ".green[EC]", "TS", ".orange[DWL]"),
+  v2 = c(".pink[$10.125]", ".purple[$10.125]",".green[$0.00]", ".green[$13.50]", "$6.75", ".orange[$2.25]"),
+  v3 = c(".pink[$4.50]", ".purple[$4.50]", ".green[$9.00]", ".green[$9.00]", "$9.00", ".orange[$0.00]")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c"),
+  caption = "Marginal External Cost .mono[=] $3.00"
+) %>%
+  kable_styling() %>% 
+  row_spec(1:6, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Pigouvian Subsidy
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 2
+tax <- 0
+
+demand <- function(x) 8 - 0.5*x
+supply <- function(x) 3 + x
+msb <- function(x) 8 - 0.5*x + ext
+demand_tax <- function(x) 8-0.5*x + tax
+
+q <- uniroot(function(x) demand_tax(x) - supply(x), range(x))$root
+p <- demand_tax(q)
+p_s <- demand(q)
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msb(q)
+zpl = seq(q,q_so,0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 2.5, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 9, y = 7, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = q, y = supply(q), xend = q, yend = msb(q)), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.4, linetype = "blank") + # PS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = demand(z)), fill = red_pink, alpha = 0.4, linetype = "blank") + # CS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = 'yellow', alpha = 0.4, linetype = "blank")+
+  geom_ribbon(aes(x = zpl, ymin = p_so, ymax = msb(zpl)), fill = orange, alpha = 0.4, linetype = 'blank')+
+  geom_ribbon(aes(x = zpl, ymin = supply(zpl), ymax = p_so), fill = orange, alpha = 0.4, linetype = 'blank')
+```
+]
+
+.less-right[
+
+A subsidy works the same way
+
+<br>
+
+But instead of charging agents to lower exchange
+
+<br>
+
+The government wiil have to pay agents to exchange more
+
+
+]
+
+---
+# Pigouvian Subsidy
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 2
+tax <- 1
+
+demand <- function(x) 8 - 0.5*x
+supply <- function(x) 3 + x
+msb <- function(x) 8 - 0.5*x + ext
+demand_tax <- function(x) 8-0.5*x + tax
+
+q <- uniroot(function(x) demand_tax(x) - supply(x), range(x))$root
+p <- demand_tax(q)
+p_s <- demand(q)
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msb(q)
+zpl = seq(q,q_so,0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 2.5, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 9, y = 7, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = q, y = supply(q), xend = q, yend = msb(q)), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.4, linetype = "blank") + # PS
+  #geom_ribbon(aes(x = z, ymin = p_s, ymax = demand(z)), fill = red_pink, alpha = 0.4, linetype = "blank") + # CS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = 'yellow', alpha = 0.4, linetype = "blank")+
+  geom_ribbon(aes(x = zpl, ymin = p_so, ymax = msb(zpl)), fill = orange, alpha = 0.4, linetype = 'blank')+
+  geom_ribbon(aes(x = zpl, ymin = supply(zpl), ymax = p_so), fill = orange, alpha = 0.4, linetype = 'blank')
+```
+]
+
+.less-right[
+
+The yellow box is negative government revenue
+
+<br>
+
+Or government expenditure
+
+<br>
+
+Per-unit subsidy: $1
+
+]
+
+
+---
+# Pigouvian Subsidy
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 2
+tax <- 1
+
+demand <- function(x) 8 - 0.5*x
+supply <- function(x) 3 + x
+msb <- function(x) 8 - 0.5*x + ext
+demand_tax <- function(x) 8-0.5*x + tax
+
+q <- uniroot(function(x) demand_tax(x) - supply(x), range(x))$root
+p <- demand_tax(q)
+p_s <- demand(q)
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msb(q)
+zpl = seq(q,q_so,0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 2.5, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 9, y = 7, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = q, y = supply(q), xend = q, yend = msb(q)), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.4, linetype = "blank") + # PS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = demand(z)), fill = red_pink, alpha = 0.4, linetype = "blank") + # CS
+  #geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = 'yellow', alpha = 0.4, linetype = "blank")+
+  geom_ribbon(aes(x = zpl, ymin = p_so, ymax = msb(zpl)), fill = orange, alpha = 0.4, linetype = 'blank')+
+  geom_ribbon(aes(x = zpl, ymin = supply(zpl), ymax = p_so), fill = orange, alpha = 0.4, linetype = 'blank')
+```
+]
+
+.less-right[
+
+The government reduces deadweight loss and increases consumer and producer surplus by incentivizing them to trade more
+]
+
+---
+# Pigouvian Subsidy
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 2
+tax <- 2
+
+demand <- function(x) 8 - 0.5*x
+supply <- function(x) 3 + x
+msb <- function(x) 8 - 0.5*x + ext
+demand_tax <- function(x) 8-0.5*x + tax
+
+q <- uniroot(function(x) demand_tax(x) - supply(x), range(x))$root
+p <- demand_tax(q)
+p_s <- demand(q)
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msb(q)
+zpl = seq(q,q_so,0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 2.5, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 9, y = 7, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = q, y = supply(q), xend = q, yend = msb(q)), linetype  = "dashed", color = met_slate, size = 1) +
+  #geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.4, linetype = "blank") + # PS
+  #geom_ribbon(aes(x = z, ymin = p_s, ymax = demand(z)), fill = red_pink, alpha = 0.4, linetype = "blank") + # CS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = 'yellow', alpha = 0.4, linetype = "blank")+
+  geom_ribbon(aes(x = zpl, ymin = p_so, ymax = msb(zpl)), fill = orange, alpha = 0.4, linetype = 'blank')+
+  geom_ribbon(aes(x = zpl, ymin = supply(zpl), ymax = p_so), fill = orange, alpha = 0.4, linetype = 'blank')
+```
+]
+
+.less-right[
+
+A per-unit subsidy of $2 fully internalizes the externality
+]
+
+
+---
+# Pigouvian Subsidy
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+x <- 0:10
+ext <- 2
+tax <- 2
+
+demand <- function(x) 8 - 0.5*x
+supply <- function(x) 3 + x
+msb <- function(x) 8 - 0.5*x + ext
+demand_tax <- function(x) 8-0.5*x + tax
+
+q <- uniroot(function(x) demand_tax(x) - supply(x), range(x))$root
+p <- demand_tax(q)
+p_s <- demand(q)
+q_so <- uniroot(function(x) msb(x) - supply(x), range(x))$root
+p_so <- msb(q_so)
+z <- seq(0, q, 0.1)
+p_2 <- msb(q)
+zpl = seq(q,q_so,0.1)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x=0), fun = msb, color = red_pink, size = 1, linetype = "solid") + # supply function
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 2.5, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 7, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(MSB), x = 9, y = 7, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_segment(aes(x = 0, y = p_s, xend = q, yend = p_s), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) + # equilibrium bundle
+  geom_point(aes(x = q, y = p_s), color = met_slate, size = 2) + # equilibrium bundle
+  geom_segment(aes(x = q, y = p, xend = q, yend = p_s), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = q, y = supply(q), xend = q, yend = msb(q)), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.4, linetype = "blank") + # PS
+  geom_ribbon(aes(x = z, ymin = p_s, ymax = demand(z)), fill = red_pink, alpha = 0.4, linetype = "blank") + # CS
+  #geom_ribbon(aes(x = z, ymin = p_s, ymax = p), fill = 'yellow', alpha = 0.4, linetype = "blank")+
+  geom_ribbon(aes(x = zpl, ymin = p_so, ymax = msb(zpl)), fill = orange, alpha = 0.4, linetype = 'blank')+
+  geom_ribbon(aes(x = zpl, ymin = supply(zpl), ymax = p_so), fill = orange, alpha = 0.4, linetype = 'blank')
+```
+]
+
+.less-right[
+
+A per-unit subsidy of $2 fully internalizes the externality
+
+<br>
+
+The market now trades at the socially optimal quantity
+]
+
+---
+
+# Takeaway
+
+Externalities occur when market actors don't feel full cost or benefit of their actions
+
+<br>
+
+A preferred method of mitigating these externalities is Pigouvian taxes or subsidies that eliminate the deadweight loss
+
+<br>
+
+By setting a per-unit tax (or subsidy) equal to the per-unit external cost (or benefit) a government can force the market to internalize the cost/benefit and produce at the social optimum
+
+<br>
+
+Potential issue: Taxing certain goods is politically difficult, subsidizing goods is costly
+
+
+
