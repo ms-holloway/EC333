@@ -28,7 +28,7 @@ red <- "#b92e34"
 # Knitr options
 opts_chunk$set(
   fig.align = "center",
-  fig.height = 7,
+  fig.height = 10,
   fig.width = 10.5,
   #dpi = 300,
   #cache = T,
@@ -464,3 +464,1100 @@ ggplot(data = data.frame(x = qs)) +
 
 .blue[**Total Surplus**]: sum of CS and PS (and government revenue when applicable)
 ]
+
+---
+
+# Market Efficiency
+
+The theoretical equilibrium in supply and demand models is **efficient** by two definitions:
+
+--
+
+<br>
+
+1. It achieves a .blue[socially optimal quantity]; it maximizes total surplus, meaning there is no deadweight loss (no wasted value)
+
+--
+
+<br>
+
+2. It is .red[Pareto efficient]; no consumer or producer can be made better off without making someone else worse off
+
+--
+
+<br>
+
+Given some assumptions, markets are efficient. But what are the assumptions?
+
+---
+# Necessary for Efficiency
+
+1. Both sides are price-takers: No one agent can sway the price of a good.
+  - This requires many agents on both sides
+
+2. No transactional frictions
+
+3. Market must be complete (all relevant costs and benefits are borne by market agents)
+
+--
+
+<br>
+
+If all 3 hold, an unregulated market will, in general, maximize total surplus
+
+
+---
+
+# Are Markets Actually Efficient?
+
+
+--
+<br>
+
+.bigger[
+Almost never
+]
+
+--
+
+<br>
+
+There almost always exists either market power, imperfect information or other frictions, or incompleteness of the market
+
+---
+
+# Market Failures
+
+When a market is not efficient on its own, we consider it a **market failure**
+
+<br>
+
+Four sources of market failure (hopefully) covered in 201:
+
+  1. Monopoly/Oligopoly
+  
+  **2. Public/Open Access Goods**
+  
+  **3. Externalities**
+  
+  **4. Lack of clear property rights**
+  
+--
+
+<br>
+
+One you probably didn't cover: **Providing for the future**
+  
+
+---
+
+# Environmental Goods
+
+Most environmental goods are either Public or Open Access, making them susceptible to market failure
+
+
+Public goods are non-rival and non-excludable
+  
+  - Non-rival: the amount of any individual's consumption does not diminish the amount available for others
+  
+  - Non-excludable: Individuals cannot be prevented from enjoying the good
+  
+--
+
+<br>
+
+The market undersupplies public goods because the marginal value to society is high, while the marginal value to any individual is relatively low
+
+Similarly, the marginal cost can be quite high relative to the benefit for producers
+
+Think: Public parks, safety, clean air, podcasts?
+
+---
+
+# Environmental Goods
+
+Open access good are non-excludable and rival
+
+<br>
+
+Since everyone can use them, but the stock does diminish, individuals will race to use them
+
+Since no one 'owns' the good, their is less incentive to upkeep (don't directly feel the costs of depletion)
+
+<br>
+
+--
+
+This is called the Tragedy of the Commons: open access goods are prone to over exploitation
+
+Think: Pastures, fish, wild game, groundwater
+
+---
+
+# Externalities
+
+Externalities occur, by definition, when markets are incomplete
+
+<br>
+
+Externality: A cost or benefit to a third party caused by a transaction in a market, drivng a wedge between private and social marginal costs or benefits
+
+<br>
+
+  - Positive externality: Imposes a benefit on a third party
+  
+  - Negative externality:  Imposes a cost on a third party
+  
+---
+
+# Externality Example
+
+```{r, echo = FALSE, fig.height = 8}
+demand <- function(x) 8 - x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = met_slate, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = met_slate, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 4.4, y = 10, color = purple, family = "Fira Sans", size = 9)+
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 8, y = 1.5, color = red_pink, family = "Fira Sans", size = 9)
+```
+
+---
+count:false
+# Externality Example
+
+```{r, echo = FALSE, fig.height = 8}
+demand <- function(x) 8 - x
+smc = function(x) 4+ 2*x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0),breaks = seq(2,10,2)) +
+  labs(x = "q", y = "P") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  geom_segment(x = 0, xend = 2, y =6, yend = 6, color = met_slate, size = 2, linetype = "dashed") +
+  geom_segment(y = 0,yend = 6, x=2,xend = 2, color = met_slate, size = 2, linetype = "dashed") +
+  stat_function(fun = supply, color = purple, size = 2) +
+  annotate("text", label = "S", x = 4.4, y = 10, color = purple, family = "Fira Sans", size = 9)+
+  stat_function(fun = smc, color = purple, size = 2) +
+  annotate("text", label = "SMC", x = 1.5, y = 10, color = purple, family = "Fira Sans", size = 9)+
+  stat_function(fun = demand, color = red_pink, size = 2) +
+  annotate("text", label = "D", x = 8, y = 1.5, color = red_pink, family = "Fira Sans", size = 9)
+```
+
+---
+
+# Lack of Property Rights
+
+.bigger[
+An exchange of goods/services can only occur if:
+  
+  - Ownership is clear
+  
+  - The good can be transferred
+  
+  - People know the good/market exists
+  
+  ]
+
+
+---
+count:false
+# Lack of Property Rights
+
+.bigger[
+An exchange of goods/services can only occur if:
+  
+  - **Ownership is clear**
+  
+  - The good can be transferred
+  
+  - People know the good/market exists
+  
+  ]
+
+
+--
+
+<br>
+
+Often a problem in environmental settings: How do you organize a market for clean air or pleasant views?
+
+---
+
+# Providing for the Future
+
+Many of our actions have consequences in the future, especially in the environmental context
+
+<br>
+
+How much we value the future (or discount costs and benefits felt there) determines how much of a resource we use today
+
+--
+
+<br>
+
+We do not know the preferences of future generations, or even our future selves
+
+<br>
+
+This means there is imperfect information in the market for future resources
+
+--
+
+Since humans are often 'present-biased' this leads to over-consumption in the present, or lack of preservation
+
+---
+
+# Equity vs Efficiency
+
+
+All of these examples have been illustrative of when markets fail to be efficient
+
+<br>
+
+But even when a market is efficient, society still may not find the allocation that occurs desirable
+--
+
+<br>
+
+In many cases, efficiency must be sacrificed to improve the equity of an allocation
+
+--
+
+<br>
+
+Environmental goods, even when exchanged in a market, still result in inequitable allocations when not correctly regulated
+
+---
+# Methods of Redistribution
+
+There are multiple ways to manipulate the allocation of goods
+
+- Put a limit on the number that can be traded(quota)
+
+<br>
+
+- Put a limit on the price they can be sold at (price ceiling/price floor)
+
+<br>
+
+- Charge producers or consumers for purchasing the good(taxes)
+  - Per-unit
+  - Ad valorem (percentage based)
+  - Lump sum
+  
+
+---
+count:false
+# Methods of Redistribution
+
+There are multiple ways to manipulate the allocation of goods
+
+- Put a limit on the number that can be traded(quota)
+
+<br>
+
+- Put a limit on the price they can be sold at (price ceiling/price floor)
+
+<br>
+
+- Charge producers or consumers for purchasing the good(taxes)
+  - **Per-unit**
+  - Ad valorem (percentage based)
+  - Lump sum
+  
+---
+---
+# Tax on Producers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+demand <- function(x) 10 - x
+demanddf = data.frame(x =c(0:10), y = demand(c(0:10)))
+supply <- function(x) 1 + x
+supplydf = data.frame(x =c(0:10), y = supply(c(0:10)))
+tax <- 3
+supply_tax <- function(x) supply(x) + tax
+x <- 0:10
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+q_2 <- uniroot(function(x) demand(x) - supply_tax(x), range(x))$root
+p <- supply(q)
+ps_2 <- supply(q_2)
+pd_2 <- demand(q_2)
+z <- seq(0, q, 0.01)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) # equilibrium bundle
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on producers affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[Market]",  "P.sub[Consumer]", "P.sub[Producer]"),
+  v2 = c(4.5, "$5.50", "$5.50"),
+  v3 = c("", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Tax on Producers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+base +
+  stat_function(aes(x= 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = supply_tax, color = purple, size = 1) + # supply function (tax)
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S[Tax]), x = 9 - tax + 0.55, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 0.5) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 0.5) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2, alpha = 0.5) +
+  
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2)
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on producers affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[Market]",  "P.sub[Consumer]", "P.sub[Producer]"),
+  v2 = c(4.5,  "$5.50", "$5.50"),
+  v3 = c(3, "$7.00", "$4.00")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Tax on Producers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = supply_tax, color = purple, size = 1) + # supply function (tax)
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S[Tax]), x = 9 - tax + 0.55, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  # geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 0.5) + # Q*
+  # geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 0.5) + # P*
+  # geom_point(aes(x = q, y = p), color = met_slate, size = 2, alpha = 0.5) +
+  
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "solid", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2) +
+  annotate("text", label = "Tax", x = q_2 + 0.45, y = p, family = "Fira Sans", size = 5, angle = 0, color = met_slate) 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on producers affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[Market]", "P.sub[Consumer]", "P.sub[Producer]"),
+  v2 = c(4.5, "$5.50", "$5.50"),
+  v3 = c(3, '<font color="#e64173">$7.00</font>', '<font color="#e64173">$4.00</font>')
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+.pink[Price wedge!]
+]
+
+---
+# Tax on Producers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+base +
+  stat_function(aes(x=0), fun = supply, color = purple, size = 1) + # supply function
+  # stat_function(aes(x = 0), fun = supply_tax, color = purple, size = 1) + # supply function (tax)
+  stat_function(aes(x=0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  # annotate("text", label = expression(S[Tax]), x = 9 - tax + 0.55, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2, alpha = 1) +
+  
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1.5, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1.5, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on producers affect total surplus in an efficient market?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "GR", "TS"),
+  v2 = c("$10.125", "$10.125", "$0.00", "$20.25"),
+  v3 = c("", "", "", "\\( \\qquad \\, \\ \\ \\)")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+]
+
+---
+count: false
+# Tax on Producers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+w <- seq(0, q_2, 0.01)
+
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = supply_tax, color = purple, size = 1) + # supply function (tax)
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S[Tax]), x = 9 - tax + 0.55, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  
+  geom_ribbon(aes(x = w, ymin = supply(w), ymax = ps_2), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q_2/3, y = ps_2 - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = pd_2, ymax = demand(w)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q_2/3, y = pd_2 + 1, color = red_pink, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = ps_2, ymax = pd_2), fill = green, alpha = 0.2, linetype = "blank") + # GR
+  annotate("text", label = expression(GR), x = q_2/3, y = p + 0.2, color = green, family = "Fira Sans", size = 6) +
+  
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2) 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on producers affect total surplus in an efficient market?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "GR", "TS"),
+  v2 = c("$10.125", "$10.125", "$0.00", "$20.25"),
+  v3 = c("$4.50", "$4.50", "$9.00", "$18.00")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Deadweight Loss
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+w <- seq(0, q_2, 0.01)
+w_2 <- seq(q_2, q, 0.01)
+
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = supply_tax, color = purple, size = 1) + # supply function (tax)
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S[Tax]), x = 9 - tax + 0.55, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2) +
+
+  geom_ribbon(aes(x = w_2, ymin = supply(w_2), ymax = p), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = w_2, ymin = p, ymax = demand(w_2)), fill = orange, alpha = 0.2, linetype = "blank") +
+  annotate("text", label = "DWL", x = (q + q_2)/2 - 0.125, y = p, color = orange, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+## Definition
+
+> The .orange[decrease in total surplus] caused by market distortions.
+
+]
+
+---
+# Tax on Consumers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+demand <- function(x) 10 - x
+supply <- function(x) 1 + x
+tax <- 3
+demand_tax <- function(x) demand(x) - tax
+x <- 0:10
+q <- uniroot(function(x) demand(x) - supply(x), range(x))$root
+q_2 <- uniroot(function(x) demand_tax(x) - supply(x), range(x))$root
+p <- supply(q)
+ps_2 <- supply(q_2)
+pd_2 <- demand(q_2)
+z <- seq(0, q, 0.01)
+
+base <- ggplot() +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(0, 10, 1)) +
+  labs(x = "Q", y = "P") +
+  theme_market
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2) # equilibrium bundle
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on consumers affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[Market]", "P.sub[Consumer]", "P.sub[Producer]"),
+  v2 = c(4.5, "$5.50", "$5.50"),
+  v3 = c("", "", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+count: false
+# Tax on Consumers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  stat_function(aes(x = 0), fun = demand_tax, color = red_pink, size = 1) +
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D[Tax]), x = 9 - tax + 0.4, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 0.5) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 0.5) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2, alpha = 0.5) +
+  
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2)
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on consumers affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[Market]",  "P.sub[Consumer]", "P.sub[Producer]"),
+  v2 = c(4.5,  "$5.50", "$5.50"),
+  v3 = c(3, "$7.00", "$4.00")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+# Tax on Consumers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  stat_function(aes(x = 0), fun = demand_tax, color = red_pink, size = 1) +
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D[Tax]), x = 9 - tax + 0.4, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "solid", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) + 
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2) +
+  annotate("text", label = "Tax", x = q_2 + 0.45, y = p, family = "Fira Sans", size = 5, angle = 0, color = met_slate) 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on consumers affect equilibrium price and quantity?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("Q.sub[Market]", "P.sub[Consumer]", "P.sub[Producer]"),
+  v2 = c(4.5, "$5.50", "$5.50"),
+  v3 = c(3, '<font color="#e64173">$7.00</font>', '<font color="#e64173">$4.00</font>')
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+.pink[Price wedge!]
+]
+
+---
+# Tax on Consumers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  # annotate("text", label = expression(S[Tax]), x = 9 - tax + 0.55, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  geom_segment(aes(x = q, y = 0, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 1) + # Q*
+  geom_segment(aes(x = 0, y = p, xend = q, yend = p), linetype  = "dashed", color = met_slate, size = 1, alpha = 1) + # P*
+  geom_point(aes(x = q, y = p), color = met_slate, size = 2, alpha = 1) +
+  
+  geom_ribbon(aes(x = z, ymin = supply(z), ymax = p), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q/3, y = p - 1.5, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = z, ymin = p, ymax = demand(z)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q/3, y = p + 1.5, color = red_pink, family = "Fira Sans", size = 6) 
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on consumers affect total surplus in an efficient market?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "GR", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "$0.00", "$20.25", "$0.00"),
+  v3 = c("", "", "", "\\( \\qquad \\, \\ \\ \\)", "")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+]
+
+---
+count: false
+# Tax on Consumers
+
+.more-left[
+```{r, echo = FALSE, fig.height = 5, fig.width = 5, dev = "svg"}
+w <- seq(0, q_2, 0.01)
+
+base +
+  stat_function(aes(x = 0), fun = supply, color = purple, size = 1) + # supply function
+  stat_function(aes(x = 0), fun = demand, color = red_pink, size = 1) + # demand function
+  stat_function(aes(x = 0), fun = demand_tax, color = red_pink, size = 1) +
+  annotate("text", label = expression(D), x = 9, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(S), x = 9, y = 9.5, color = purple, family = "Fira Sans", size = 9) +
+  annotate("text", label = expression(D[Tax]), x = 9 - tax + 0.4, y = 1.6, color = red_pink, family = "Fira Sans", size = 9) +
+  
+  geom_ribbon(aes(x = w, ymin = supply(w), ymax = ps_2), fill = purple, alpha = 0.2, linetype = "blank") + # PS
+  annotate("text", label = "PS", x = q_2/3, y = ps_2 - 1, color = purple, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = pd_2, ymax = demand(w)), fill = red_pink, alpha = 0.2, linetype = "blank") + # CS
+  annotate("text", label = "CS", x = q_2/3, y = pd_2 + 1, color = red_pink, family = "Fira Sans", size = 6) +
+  geom_ribbon(aes(x = w, ymin = ps_2, ymax = pd_2), fill = green, alpha = 0.2, linetype = "blank") + # GR
+  annotate("text", label = expression(GR), x = q_2/3, y = p - 0.2, color = green, family = "Fira Sans", size = 6) +
+  
+  geom_segment(aes(x = q_2, y = ps_2, xend = q_2, yend = pd_2), linetype  = "solid", color = met_slate, size = 1) +
+  geom_segment(aes(x = 0, y = pd_2, xend = q_2, yend = pd_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q_2, y = pd_2), color = met_slate, size = 2) +
+  geom_segment(aes(x = q_2, y = 0, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_segment(aes(x = 0, y = ps_2, xend = q_2, yend = ps_2), linetype  = "dashed", color = met_slate, size = 1) +
+  geom_point(aes(x = q_2, y = ps_2), color = met_slate, size = 2) +
+  geom_ribbon(aes(x = w_2, ymin = supply(w_2), ymax = p), fill = orange, alpha = 0.2, linetype = "blank") +
+  geom_ribbon(aes(x = w_2, ymin = p, ymax = demand(w_2)), fill = orange, alpha = 0.2, linetype = "blank") +
+  annotate("text", label = "DWL", x = (q + q_2)/2 - 0.125, y = p, color = orange, family = "Fira Sans", size = 6)
+```
+]
+
+.less-right[
+
+**Q:** How does a per-unit tax on consumers affect total surplus in an efficient market?
+
+```{R, echo = F, escape = F}
+tab <- data.frame(
+  v1 = c("CS", "PS", "GR", "TS", "DWL"),
+  v2 = c("$10.125", "$10.125", "$0.00", "$20.25", "$0.00"),
+  v3 = c("$4.50", "$4.50", "$9.00", "$18.00", "$2.25")
+) %>% kable(
+  escape = F,
+  col.names = c("Tax", "$0.00", "$3.00"),
+  align = c("l", "c", "c")
+) %>%
+  kable_styling() %>% 
+  row_spec(1:3, extra_css = "line-height: 110%;")
+tab 
+```
+
+]
+
+---
+
+class: dark-slide
+
+<br>
+
+<br>
+
+<br>
+
+.center[
+.biggest[.white[Calculus Aside]]
+]
+
+---
+
+# Marginal Values
+
+Traditional economics is dependent on marginal changes
+
+<br>
+
+How much do we benefit from an additional good, or how much does an additional good cost
+
+--
+<br>
+
+If we have a function, $y = f(x)$, the derivative of y with respect to x tells us the marginal contribution to y of an additional unit of x
+
+--
+
+This could be the effect of an additional unit on marginal benefit(or price) or the effect of an additional unit of time to the growth of a tree, or forest, or fish population, etc.
+
+--
+
+<br>
+
+We won't focus heavily on this, but don't want to catch you off guard when it shows up
+
+---
+
+# Power Rule
+
+Let $y=f(x)= x^a$
+
+--
+
+Then $\frac{\partial y}{\partial x}$, or the derivative of y with respect to x, = $a x^{a-1}$
+
+--
+
+<br>
+
+Just multiply the function by the original power and subtract one from the original power
+
+--
+
+The resulting equation, $a x^{a-1}$ tells us how much a small change in x will change y
+
+<br>
+
+In other words, it tells us what the slope of the function is at the value of x we plug in
+
+---
+
+# Power Rule
+
+Derivative of $x^2$?
+
+--
+
+$2x$
+
+--
+
+<br>
+
+Derivative of $3x^3 + 5x^2 + 6x + 4$?
+
+--
+
+Take the derivative of each term separately and add them together
+
+--
+
+If there's no x, then the derivative is zero, a change in x will not change y
+
+--
+
+<br>
+
+Answer: $9x^2 + 10x + 6$
+
+---
+
+# Application
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+cost = function(x) 2 + 2*x^2
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 40), expand = c(0, 0)) +
+  labs(x = "q", y = "$") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  stat_function(fun = cost, color = orange, size = 2) +
+  annotate("text", label = "Cost", x = 5, y = 35, color = orange, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+We want to know the marginal cost to producers of producing another unit of this good
+
+<br>
+
+The equation is $Cost = 2+ 2*q^2$
+
+
+
+
+
+
+]
+
+---
+count:false
+# Application
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+cost = function(x) 2 + 2*x^2
+mc = function(x) 4*x
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 40), expand = c(0, 0)) +
+  labs(x = "q", y = "$") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  stat_function(fun = cost, color = orange, size = 2) +
+  annotate("text", label = "Cost", x = 5, y = 35, color = orange, family = "Fira Sans", size = 9) +
+  stat_function(fun = mc, color = purple, size = 2) +
+  annotate("text", label = "MC", x = 5, y = 18, color = purple, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+We want to know the marginal cost to producers of producing another unit of this good
+
+<br>
+
+The equation is $Cost = 2+ 2*q^2$
+
+<br>
+
+$\frac{\partial Cost}{\partial q} = MC = 4q$
+
+
+The marginal cost of the next unit is always equal to 4 times the quantity up to that point
+
+
+]
+
+---
+
+# Application
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+growth = function(x)  -0.5*x^2 + 4*x + 10
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 40), expand = c(0, 0)) +
+  labs(x = "t", y = "Volume") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  stat_function(fun = growth, color = orange, size = 2) +
+  annotate("text", label = "Volume", x = 5, y = 18, color = orange, family = "Fira Sans", size = 9) 
+```
+]
+
+.pull-right[
+We want to know at how many years a forest's volume slows to halt
+
+<br>
+
+The equation is $Volume = -0.5t^2 + 4t + 10$
+
+
+
+
+
+
+]
+
+---
+count:false
+# Application
+.pull-left[
+```{r, echo = FALSE}
+demand <- function(x) 8 - x
+growth = function(x)  -0.5*x^2 + 4*x + 10
+mg = function(x) -x + 4
+ggplot(data = data.frame(x = 0), mapping = aes(x = 0)) +
+  scale_x_continuous(limits = c(0, 10.5), expand = c(0, 0), breaks = seq(2,10,2)) +
+  scale_y_continuous(limits = c(0, 40), expand = c(0, 0)) +
+  labs(x = "t", y = "Volume") +
+  theme_simple+
+  #geom_rect(aes(xmin = 0, xmax = 5, ymin = 5, ymax = 10.5), alpha = 0.2, fill = red_pink) +
+  #geom_rect(aes(xmin = 5, xmax = 10.5, ymin = 0, ymax = 5), alpha = 0.2, fill = red_pink) +
+  stat_function(fun = growth, color = orange, size = 2) +
+  annotate("text", label = "Volume", x = 5, y = 20, color = orange, family = "Fira Sans", size = 9) +
+  stat_function(fun = mg, color = green, size = 2) +
+  annotate("text", label = "growth", x = 5, y = 1, color = green, family = "Fira Sans", size = 9) 
+```
+
+]
+
+.pull-right[
+We want to know at how many years a forest's volume slows to halt
+
+<br>
+
+The equation is $Volume = -0.5t^2 + 4t + 10$
+
+<br>
+
+Marginal growth = $-t+4$
+
+
+The forest isn't growing or shrinking when this = 0
+
+so at $t=4$ growth halts
+
+
+]
+
+---
+
+# Next Week
+
+Deeper dive into key concepts
+
+<br> 
+
+Tuesday we'll go more in depth on externalities, stuff you may not have learned in 201 and applies directly to REE
+
+<br>
+
+Thursday we'll do the same for public and open access goods
