@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>EC 333: Forests</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Steven Holloway" />
+    <script src="libs/header-attrs-2.11/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="my-css.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# EC 333: Forests
+### Steven Holloway
+### Fall 2023 - 10 July 2023
+
+---
+
+
+
+
+# Tree Facts
+
+There are over 60,000 species of trees in the world
+
+&lt;br&gt;
+
+Depending on the species, a tree can produce 260 pounds of oxygen in a year
+
+&lt;br&gt;
+
+20% of the world's oxygen is produced in the Amazon Rainforest
+
+&lt;br&gt;
+
+An acre of trees can remove 2.6 *tons* of CO2 in a year
+
+&lt;br&gt; 
+
+Trees help mitigate climate change by absorbing CO2 and also help with climate adaptation by locally cooling by up to 20 degrees
+
+---
+
+# Tree cover loss
+
+.pull-left[
+
+
+Many governments have realized the necessity of maintaining our forests
+
+&lt;br&gt;
+
+North American conservation efforts have lead to growing forests in aggregate since the 1940s
+
+&lt;br&gt;
+
+This isn't the case everywhere
+
+]
+
+.pull-right[
+
+
+&lt;img src="deforest.jpg" width="9008" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Efficient?
+
+One way (of many) to view trees is as capital for current and future generations
+
+&lt;br&gt;
+
+They are a finite resource that has the potential to regrow (like fish)
+
+&lt;br&gt;
+
+If we want people in the future to be able to benefit from trees, while still benefitting ourselves, we need to harvest in a way that doesn't affect their ability to grow back
+
+&lt;br&gt;
+
+We need to be **efficient** in our harvest relative to a function that takes future humans into account
+
+---
+
+# Harvest
+
+.bigger[
+
+It can be thought of as 'costly' to leave trees standing - the goal is to find *when* the relative benefit of harvesting them is at its highest
+
+&lt;br&gt; 
+
+The goal of an efficient harvest problem is to identify the **length of time to wait** between timber harvests that maximizes the difference between total benefits and total costs
+
+&lt;br&gt;
+
+Appropriately forward thinking models will consider the benefit to future society in this calculation
+
+]
+
+---
+
+# Harvest time considerations
+
+Dynamic models of human behavior and resource growth can get complicated fast
+
+&lt;br&gt;
+
+We can't capture all the nuances at once, so just keep in mind
+
+  1. .green[**Forests have value outside of timber**]
+  
+    - Our simple model will only directly think of the benefit from commercial timber extraction
+ &lt;br&gt;
+ 
+  2. .pink[**Forest lands have a wide variety of property rights**]
+  
+    - We'll have to pick out one at a time to focus on
+    
+---
+
+class: middle, inverse
+
+.biggest[Model of Forest Growth]
+
+---
+
+# Biological rotation
+
+.bigger[
+Assume trees in a forest are homogenous (all exactly the same)
+
+&lt;br&gt;
+
+We can then measure the growth of the forest (or tree farm) as a function of time
+
+&lt;br&gt;
+
+Say that volume of trees follows `\(V(t) = 10t + t^2 - 0.01t^3\)`
+
+]
+
+---
+
+# Biological rotation
+
+`\(V(t) = 10t + t^2 - 0.01t^3\)`
+
+&lt;img src="growth.png" width="1233" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Calculus Time
+
+To find the point where the maximum (or minimum) of a function occurs, we can take the *first derivative of the function*, set it equal to 0, and solve for `\(t\)` in our case - We're finding where growth of the function = 0
+
+&lt;br&gt;
+
+`\(V(t) = 10t + t^2 - 0.01t^3\)`
+
+--
+&lt;br&gt;
+
+`\(V'(t) = 10 + 2t - 0.03t^2\)`
+
+`\(V'(t) = 10 + 2t - 0.03t^2 = 0\)`
+
+--
+
+`\(V'(t) = 0\)` at `\(t \approx 71\)`
+
+&lt;br&gt;
+
+So the forest grows for 71 years before beginning to shrink
+
+---
+
+# Calculus Time
+
+To find the point where growth *slows down* we need to take the *second derivative* set = 0, and solve for `\(t\)` - We're  finding where the rate of change of growth is equal to 0
+
+&lt;br&gt;
+
+`\(V'(t) = 10 + 2t - 0.03t^2\)`
+
+--
+
+&lt;br&gt;
+ 
+`\(V''(t) = 2 -0.06t\)`
+
+`\(V''(t) = 2 -0.06t = 0\)`
+
+--
+
+`\(V''(t) = 0\)` at `\(t \approx 33\)`
+
+&lt;br&gt;
+
+So the forest grows less than it did last year starting at year 33
+
+---
+
+# When to Harvest 
+
+If growth slows at 33 years and growth stops at 71 years, when is the best time to harvest?
+
+&lt;br&gt;
+
+One .pink[harvest interval] is to let the forest grow for 71 years to maximize *volume* of harvest
+
+&lt;br&gt;
+
+A slightly more sophisticated option is to cut trees when .blue[**mean annual increment (MAI) is maximized]
+
+&lt;br&gt;
+
+`\(MAI = \frac{V(t)}{t}\)`, the average volume of the forest up to that year
+
+&lt;br&gt;
+
+Maximizing MAI as our harvest rule takes time into account and still maximizes some notion of tree volume
+
+---
+
+# Biological Rotation
+
+.pull-left[
+
+Harvesting according to maximizing MAI is called the .green[*biological rotation]
+
+&lt;br&gt;
+
+In our case `\(\frac{V(t)}{t} = 10 +t -0.01t^2\)`
+
+&lt;br&gt;
+
+MAI is maximized at 50 years
+
+]
+
+.pull-right[
+
+&lt;img src="MAI.png" width="1193" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Biological Rotation
+
+.bigger[
+Biological rotation maximizes timber volume over years, but that's all it maximizes
+
+&lt;br&gt;
+
+It does not consider the benefits or costs to society of that volume
+
+&lt;br&gt;
+
+We need to consider more in our analysis
+]
+
+---
+
+class: middle, inverse
+
+.biggest[Wicksell Rotation]
+
+---
+
+# Wicksell Rotation
+
+.bigger[
+
+As a forest owner, one has to consider when the benefit of cutting outweigh the benefit of letting the tree continue to grow
+
+&lt;br&gt;
+
+The owner needs to compare the **net returns of cutting the trees this year to the net returns of waiting one more year**
+
+]
+
+---
+
+# Wicksell Rotation
+
+The .orange[Wicksell Rotation] focuses on when a *single harvest* most benefits a *private landowner*
+
+&lt;br&gt;
+
+With this simplification, it allows us to complicate the model in another way
+
+&lt;br&gt;
+
+It introduces the concept of time value of money into the optimal harvest decision
+
+&lt;br&gt;
+
+The owner considers the .red[**discount rate**]: the .underline[expected rate of return] for and investment, .green[**r**]
+
+---
+
+# Wicksell Rotation
+
+The general rule for optimal harvesting in this context is to compare the net benefits of cutting this year to cutting next year
+
+&lt;br&gt;
+
+  - Don't Cut  if  `\(MNB_0 &lt; MNB_1\)`
+  
+  - Cut        if  `\(MNB_0 = MNB_1\)`
+  
+  
+&lt;br&gt;
+
+If `\(MNB_0 &gt; MNB_1\)`, you've technically missed your optimal harvest
+
+---
+
+# Wicksell Rotation
+
+As a forest owner, what are the cost and benefit involved in the decision?
+
+--
+
+&lt;br&gt;
+
+
+They can sell the timber at price `\(p\)`
+
+It costs them `\(c\)` to harvest each unit
+
+They harvest every unit in the forest in that period - `\(V(T_0)\)`
+
+--
+
+&lt;br&gt;
+
+`\(MNB_0 = (p-c)V(T_0)\)`
+
+---
+
+# Wicksell Rotation
+
+How do we account for value in future periods?
+
+--
+
+We have to weight future value by the discount rate, `\(r\)`
+
+&lt;br&gt;
+
+--
+
+`\(MNB_1 = \frac{(p-c)V(T_1)}{(1+r)}\)`
+
+The larger `\(r\)` is, the less we value future benefits
+
+---
+
+# Wicksell Rotation
+
+Remember we want to find where `\(MNB_0 = MNB_1\)`
+
+&lt;br&gt;
+
+`\(MNB_0 = (p-c)V(T_0) =  \frac{(p-c)V(T_1)}{(1+r)} = MNB_1\)`
+
+Assume price and cost stay fixed
+
+--
+
+`\(V(T_0) = \frac{(p-c)V(T_1)}{(1+r)}\)`
+
+`\(V(T_0))(1+r) = V(T_1)\)`
+
+`\(V(T_0) + V(T_0)r = V(T_1)\)`
+
+--
+
+&lt;br&gt;
+
+`\(r = \frac{V(T_1)-V(T_0)}{V(T_0)}\)` or `\(\frac{\Delta V}{V(T_0)}\)`
+
+---
+
+# Wicksell Rotation
+
+`\(\frac{V(T_1)-V(T_0)}{V(T_0)}\)` is the percent change in forest volume - Can also call this the *return to the capital asset* from not touching it for a year
+
+&lt;br&gt;
+
+Optimal harvest occurs when the percentage increase in the asset exactly equals the rate we discount future benefit at
+
+&lt;br&gt;
+
+We want growth to be just offset by how much we care about future value
+
+&lt;br&gt;
+
+A higher interest rate implies a shorter rotation - harvesting when the forest is still growing at a higher rate
+
+---
+
+# Wicksell Rotation
+
+.pull-left[
+
+&lt;img src="growth.png" width="1233" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+The longer growth rate is increasing, the longer we wait to harvest
+
+&lt;br&gt;
+
+In this example, as long as $ r&gt; 0.02$, the Wicksell rotation is shorter than the *biological rotation*
+
+&lt;br&gt;
+
+It would not be optimal to the owner to maximize volume
+]
+
+---
+
+class: middle, inverse
+
+.biggest[Faustmann Rotation]
+
+---
+
+# Faustmann Rotation
+
+.pink[Biological Rotation] tells us to maximize average tree volume
+
+
+&lt;br&gt;
+
+.orange[Wicksell Rotation] takes into account the time value of money
+
+&lt;br&gt;
+
+The .blue[Faustmann Rotation] adds two more real world items to think of
+
+  1. The **Site Value**, `\(S\)` of the forested piece of land
+  
+  2. The **Cost of Replanting**, `\(D\)`, after a harvest
+  
+---
+
+# Faustmann Rotation
+
+The Faustmann Rotation not only when to harvest, but also **alternative land use**
+
+&lt;br&gt;
+
+Each year, the land owner has multiple choices:
+
+  1. Cut and replant
+  
+  2. Wait, then cut and replant
+  
+  3. Cut and change land use
+  
+  4. Wait, cut and change land use
+  
+---
+
+# Site Value
+
+Site value is equal to the value of the land used in its most profitable way - what you could sell it for or make off the land if it weren't forest
+
+&lt;br&gt; 
+
+If forestry is the most profitable land use, `\(S\)` is the value of land as timber harvest, but if it would be more valuable as different kind of farm or land for housing, `\(S\)` will reflect one of those
+
+&lt;br&gt;
+
+The site value is equal to the *present value of expected future revenue* from the land in its most profitable use
+
+&lt;br&gt;
+
+Think of the discount rate - $110 next year is worth only $100 to you now
+
+&lt;br&gt;
+
+Adding `\(S\)` to the model allows us to think of the *opportunity cost* of using the land for forestry
+
+---
+
+# Faustmann Optimal Harvest
+
+Our rule is similar to Wicksell Rotation - with just a few complications
+
+&lt;br&gt;
+
+Cut and replant when `\(MNB_{cut,0} = MNB_{cut,1}\)`
+
+&lt;br&gt;
+
+But these benefits now must take into account `\(D\)` - the cost of starting over - and `\(S\)` - what we could sell the land for this period
+
+--
+
+`\(MNB_{cut,0} = (p-c)V(T_0)-D+S\)`
+
+`\(MNB_{cut,1} = \frac{(p-c)[V(T_0)+ \Delta V]-D+S}{1+r}\)`
+
+---
+
+# Faustmann Optimal Harvest
+
+We know `\((p-c)\)` is going to wash out, so lets simplify the equation
+
+&lt;br&gt;
+
+--
+
+`\(V(T_0)-D+S = \frac{(V(T_0)+ \Delta V)-D+S}{1+r}\)`
+
+
+--
+
+`\((V(T_0)-D+S)(1+r) = (V(T_0)+ \Delta V)-D+S\)`
+
+`\(V(T_0) + rV(T_0) - D + S -rD +rS =(V(T_0)+ \Delta V)-D+S\)`
+
+--
+
+&lt;br&gt;
+
+`\(r(V(T_0) - D) + rS = \Delta V\)`
+
+--
+
+The LHS is the benefit of harvesting NOW. The RHS is the cost(forgone value of timber) from harvesting now
+
+---
+
+# Faustmann Optimal Harvest
+
+.pull-left[
+
+&lt;img src="Faust.png" width="785" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+.pull-right[
+
+We can graph the cost and benefit - where the curves cross is the `\(T*\)` when we should harvest
+
+&lt;br&gt;
+
+Intitially tree growth out paces the marginal benefit of harvest
+
+&lt;br&gt;
+
+But as growth slows down, eventually the benefit of harvesting catches up
+
+]
+
+---
+
+# Faustmann Optimal Harvest
+
+We can look at this condition the same we did Wicksell, by putting `\(r\)` by itself
+
+`\(r = \frac{\Delta V}{V(T_0) - D + S}\)`
+
+&lt;br&gt;
+
+The land owner should time harvest so that her rate of return on the asset is equal to her discount rate
+
+&lt;br&gt;
+
+The only difference between this and Wicksell is that the value of the land and cost of upkeep is also being taken into account
+
+---
+
+# Faustmann Optimal Harvest
+
+Compared to the biological and Wicksell Rotations, Faustmann is mechanically shorter than both:
+
+`\(T_B &gt; T_W &gt; T_F\)`
+
+&lt;br&gt;
+
+Given reasonable assumptions on the discount rate, Wicksell is shorter than the biological
+
+&lt;br&gt;
+
+Faustmann forces the rotation to be shorter by including `\(D\)` and `\(S\)`
+
+`\(\frac{\Delta V}{V(T_0) - D + S} &gt; \frac{\Delta V}{V(T_0)}\)`
+
+Assuming `\(S - D\)` is positive (would it make sense for this not to be the case?)
+
+--
+
+Since this means a higher `\(r\)` under Faustmann, we get a shorter rotation(harvesting when growth rate is higher)
+
+---
+
+class: middle, inverse
+
+.biggest[Non-timber Benefits]
+
+---
+
+# Non-timber benefits
+
+Of course forests have values outside of timber harvesting
+
+Forests bring value through:
+
+  - Acting as recreational areas
+  
+  - Providing Oxygen
+  
+  - Acting as natural filtration for water 
+  
+  - Promoting biodiversity
+  
+  - Having incalculable intrinsic value
+  
+---
+
+# Non-timber benefits
+
+.bigger[
+To go along with these benefits, there are costs beyond the profit margin when it comes to harvesting trees
+
+&lt;br&gt;
+
+Old Growth forests are forests that have stood long enough to promote ecosystems within themselves
+
+&lt;br&gt;
+
+By removing these, we are removing habitats for animals and other organisms - potentially driving them to extinction
+
+]
+
+---
+
+# Non-timber benefits and Optimal harvest
+
+.pull-left[
+
+&lt;img src="plusH.png" width="1029" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+Consider adding `\(H\)`, the losses involved with harvesting, to our Faustmann problem
+
+&lt;br&gt;
+
+This moves the curve upwards ,meaning intersection will occur at a later `\(T*\)`
+
+&lt;br&gt;
+
+Depending on the value of `\(H\)`, it's possible that the value is so high that T* may be infinite(it's never optimal to cut down the trees)
+
+]
+
+---
+
+# Property Rights
+
+Forests may be public goods (National Parks) or open-access resources(timber harvests)
+
+&lt;br&gt;
+
+The open-access equilibrium may lead to over-harvesting and deforestation
+
+&lt;br&gt;
+
+By introducing property rights, we may be able to alleviate the over-harvesting issue
+  - Remember that the owner still has their own interests in mind, though
+  
+&lt;br&gt;
+
+Property rights can be especially helpful because efficient rotation cycles can be VERY long (upwards of 80 years)
+
+&lt;br&gt;
+
+Owners are less likely to cut down trees inefficiently early if they don't have to worry about others beating them to it
+
+---
+
+# Complications
+
+Forest management is not as simple as we have presented thus far
+
+&lt;br&gt; 
+
+Harvesters also have to contend with
+
+  - Wildfires, which are partially exasperated by improper forest management
+  
+    - Pollution
+  
+  - Changing climates
+  
+  - Societal benefits
+  
+---
+
+# Complications
+
+.pull-left[
+
+&lt;img src="Hashida.png" width="1063" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+Hashida and Lewis(2019) predict a shift in forest compositions on the west coast from Douglas Firs to Ponderosa Pines or hardwoods
+
+&lt;br&gt;
+
+Given the changing climate, Douglas Firs do not perform as well as less native alternatives
+
+
+]
+
+---
+
+# Complications
+
+Forest managers may also face new incentives to *not* cut down trees
+
+&lt;br&gt;
+
+Governments are increasingly adopting carbon pricing policies that can be complemented by increased forest presence
+
+&lt;br&gt;
+
+Policies in the future may pay forest managers to now cut down some of their trees - changing the problem they solve to determine optimal rotation length
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
